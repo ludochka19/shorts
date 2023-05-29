@@ -1,0 +1,44 @@
+from web3 import Web3
+
+# Подключение к локальной ноде или удаленной инфраструктуре Ethereum
+web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/your_infura_project_id'))
+
+# Адрес контракта и ABI (Application Binary Interface)
+contract_address = '0x1234567890abcdef...'
+contract_abi = [
+    # Здесь следует указать интерфейс вашего контракта
+    # Включая функцию для клейма токена
+]
+
+# Адрес кошелька, от имени которого будет осуществляться клейм токена
+wallet_address = '0xabcdef123456...'
+
+# Приватный ключ кошелька для подписи транзакции
+private_key = '0xabcdef123456...'
+
+# Создание экземпляра контракта на основе адреса и ABI
+contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+
+# Получение неподтвержденного хеша транзакции для клейма токена
+claim_tx_hash = contract.functions.claim().buildTransaction({
+    'from': wallet_address,
+    'gas': 200000,  # Стоимость газа для выполнения транзакции
+    'gasPrice': web3.toWei('10', 'gwei')  # Стоимость газа в Wei
+})
+
+# Подпись транзакции с использованием приватного ключа
+signed_tx = web3.eth.account.signTransaction(claim_tx_hash, private_key=private_key)
+
+# Отправка подписанной транзакции на сеть Ethereum
+tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
+
+# Ожидание подтверждения транзакции
+receipt = web3.eth.waitForTransactionReceipt(tx_hash)
+
+# Обработка результата
+if receipt.status:
+    print('Token claim successful!')
+    # Дополнительные действия после успешного клейма токена
+else:
+    print('Token claim failed.')
+    # Обработка ситуации, когда клейм токена не удался
